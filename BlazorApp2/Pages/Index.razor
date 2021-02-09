@@ -1,0 +1,39 @@
+﻿@page "/"
+@using System.Diagnostics
+@using System.Reflection
+@using Microsoft.Extensions.DependencyInjection
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+@inject IServiceProvider ServiceProvider
+
+@code
+{
+    private bool IsServiceProviderDisposed()
+    {
+        var field = this.ServiceProvider.GetType().GetField("_disposed", BindingFlags.NonPublic |
+                                                                         BindingFlags.Instance);
+        var isDisposed = (bool) field.GetValue(this.ServiceProvider);
+        return isDisposed;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(100);
+            Debug.WriteLine($"{nameof(Index)} ->" + this.ServiceProvider.GetHashCode());
+
+            Debug.Assert(!IsServiceProviderDisposed());
+
+            var helloService = this.ServiceProvider.GetRequiredService<HelloService>();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}
+
